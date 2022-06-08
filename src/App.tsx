@@ -1,26 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import "./App.css";
+import Game from "./components/Game/Game";
+import {maps} from "./TrackSource";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export const walls = maps[1].walls;
+export const finish = maps[1].finish;
+export const size_map = maps[1].size_map;
+
+class App extends Component {
+   render() {
+      const gameProps = {
+         size_x: maps[1].size_map.size_x,
+         size_y: maps[1].size_map.size_y,
+         initial_x: maps[1].size_map.initial_x,
+         initial_y: maps[1].size_map.initial_y,
+         W: maps[1].size_map.W
+      };
+      return (
+         <div className="App">
+            <Game {...gameProps} />;
+         </div>
+      );
+   }
 }
 
 export default App;
