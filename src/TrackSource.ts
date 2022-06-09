@@ -6,8 +6,8 @@ export const walls = [
          type: "rect",
          x: 3,
          y: 3,
-         height: 4,
-         width: 4
+         height: 2,
+         width: 5
       }
    ],
    [

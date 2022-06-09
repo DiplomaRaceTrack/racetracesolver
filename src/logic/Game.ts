@@ -1,18 +1,27 @@
 import {PointState} from "./PointState";
 import React from "react";
 import {intersect} from "../utils/intersect";
-import {finish, size_map, walls} from "../App";
 
 export class Solver {
-   constructor(start_x: number, start_y: number, speed_x: number, speed_y: number, goal_x?: number, goal_y?: number) {
+   constructor(start_x: number, start_y: number, speed_x: number, speed_y: number, finish: any[], size_map: any, walls: any[],
+               goal_x?: number, goal_y?: number) {
       this.start_node = new PointState(start_x, start_y, speed_x, speed_y);
       this.goal_node = new PointState(goal_x || 0, goal_y || 0, 0, 0);
+
+      this.finish = finish;
+      this.size_map = size_map;
+      this.walls = walls;
+
       this.bfs = this.bfs.bind(this);
       this.solveDFS = this.solveDFS.bind(this);
    }
 
    protected start_node: PointState;
    protected goal_node: PointState;
+
+   protected finish: any[];
+   protected size_map: any;
+   protected walls: any[];
 
    protected queue: Array<PointState> = [];
    protected visited: any = [];
@@ -49,7 +58,7 @@ export class Solver {
 
    intersectWall(x: number, y: number) {
       let flag = false;
-      walls.forEach((wall) => {
+      this.walls.forEach((wall: any) => {
          if (x >= wall.x && x <= wall.x + wall.width && y >= wall.y && y <= wall.y + wall.height) {
             flag = true;
          }
@@ -62,10 +71,10 @@ export class Solver {
    }
 
    private isValidMove(currentNode: PointState, nexNode: PointState): boolean {
-      const isFinish = finish.some(finishPoint => intersect(finishPoint, [[currentNode.x, currentNode.y], [nexNode.x, nexNode.y]]));
+      const isFinish = this.finish.some(finishPoint => intersect(finishPoint, [[currentNode.x, currentNode.y], [nexNode.x, nexNode.y]]));
       const isWall = this.intersectWall(nexNode.x, nexNode.y) || this.intersectWall(currentNode.x, currentNode.y);
       const isExternal = nexNode.x <= 0 || nexNode.y <= 0
-         || nexNode.x >= size_map.size_x || nexNode.y >= size_map.size_y;
+         || nexNode.x >= this.size_map.size_x || nexNode.y >= this.size_map.size_y;
       if (nexNode.x === currentNode.x && nexNode.y === currentNode.y) return false;
       if (nexNode.x > currentNode.x + currentNode.delta_x + 1 || nexNode.x < currentNode.x + currentNode.delta_x - 1) return false;
       if (nexNode.y > currentNode.y + currentNode.delta_y + 1 || nexNode.y < currentNode.y + currentNode.delta_y - 1) return false;
@@ -121,7 +130,7 @@ export class Solver {
       while (this.queue.length !== 0) {
          end = new Date().getTime();
          let currentState: PointState = this.queue.shift() as PointState;
-         if (end - start > 300000) {
+         if (end - start > 17000) {
             alert(`Time: ${end - start}`);
             this.stateGraph = graph;
             return graph;

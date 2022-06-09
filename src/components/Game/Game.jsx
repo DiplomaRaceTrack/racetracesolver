@@ -12,43 +12,32 @@ import Finish from "../Finish/Finish";
 import Corner from "../Corner/Corner";
 
 import {Solver} from "../../logic/Game";
-import {finish, size_map, walls} from "../../App";
+import {maps} from "../../TrackSource";
 
 class Game extends PureComponent {
-   static propTypes = {
-      size_x: PropTypes.number.isRequired,
-      size_y: PropTypes.number.isRequired,
-      initial_x: PropTypes.number.isRequired,
-      initial_y: PropTypes.number.isRequired,
-      W: PropTypes.number.isRequired
-   };
-
    constructor(props) {
       super(props);
       this.state = {
-         x: props.initial_x,
-         y: props.initial_y,
-         W: props.W,
+         x: maps[0].size_map.initial_x,
+         y: maps[0].size_map.initial_y,
+         W: maps[0].W,
          delta_x: 0,
          delta_y: 0,
-         trace: [[props.initial_x, props.initial_y]],
-         walls: walls,
-         finish: finish,
-         trackMap: props.trackMap,
+         trace: [[maps[0].size_map.initial_x, maps[0].size_map.initial_y]],
+         walls: maps[0].walls,
+         finish: maps[0].finish,
          corners: [],
          currentSolution: [],
-         currentSolutionIndex: 0
+         currentSolutionIndex: 0,
+         size_map: maps[0].size_map,
+         id_trace: 0
       };
       this.isFinish = this.isFinish.bind(this);
    }
 
-   intersectWall(x, y) {
-      return x >= walls[0].x && x <= walls[0].x + walls[0].width && y >= walls[0].y && y <= walls[0].y + walls[0].height;
-   }
-
    isFinish(x, y) {
       const s = this.state;
-      if (x === this.props.initial_x && y === this.props.initial_y) {
+      if (x === this.state.size_map.initial_x && y === this.state.size_map.initial_y) {
          return false;
       }
       const isFinish = s.finish.some(finishPoint => intersect(finishPoint, [[s.x, s.y], [x, y]]));
@@ -57,7 +46,7 @@ class Game extends PureComponent {
 
    intersectWall(x, y) {
       let flag = false;
-      walls.forEach((wall) => {
+      this.state.walls.forEach((wall) => {
          if (x >= wall.x && x <= wall.x + wall.width && y >= wall.y && y <= wall.y + wall.height) {
             flag = true;
          }
@@ -69,7 +58,7 @@ class Game extends PureComponent {
       const s = this.state;
       const isFinish = s.finish.some(finishPoint => intersect(finishPoint, [[s.x, s.y], [x, y]]));
       const isWall = this.intersectWall(x, y);
-      const isExternal = x <= 0 || y <= 0 || x >= size_map.size_x || y >= size_map.size_y;
+      const isExternal = x <= 0 || y <= 0 || x >= this.state.size_map.size_x || y >= this.state.size_map.size_y;
 
       const isWin = s.y > s.finish[0].y + 1 && y <= s.finish[0].y + 1;
       if (x === s.x && y === s.y) return false;
@@ -77,10 +66,6 @@ class Game extends PureComponent {
       if (y > s.y + s.delta_y + 1 || y < s.y + s.delta_y - 1) return false;
       if (isWall || isFinish || isExternal) {
          return false;
-      }
-      if (isWin) {
-         alert('You win!');
-         this.reloadGame();
       }
       return true; // TODO; check walls
    }
@@ -109,7 +94,7 @@ class Game extends PureComponent {
             }
             break;
          case 'rt':
-            startPoint = {x: this.props.size_x - this.state.W, y: this.props.size_y - 1};
+            startPoint = {x: this.state.size_map.size_x - this.state.W, y: this.state.size_map.size_y - 1};
             // правый нижний прямоуольник
             for (let i = startPoint.x; i < startPoint.x + A.width; i++) {
                for (let j = startPoint.y; j > startPoint.y - A.height - B.height; j--) {
@@ -118,7 +103,7 @@ class Game extends PureComponent {
             }
             break;
          case 'll':
-            startPoint = {x: this.props.size_x - 1, y: this.state.W - 1};
+            startPoint = {x: this.state.size_map.size_x - 1, y: this.state.W - 1};
             // правый верхний
             for (let i = startPoint.x; i > startPoint.x - A.height - B.height; i--) {
                for (let j = startPoint.y; j > startPoint.y - A.width; j--) {
@@ -127,7 +112,7 @@ class Game extends PureComponent {
             }
             break;
          case 'rb':
-            startPoint = {x: 0, y: this.props.size_y - this.state.W};
+            startPoint = {x: 0, y: this.state.size_y - this.state.W};
             // левый нижний
             for (let i = startPoint.x; i < startPoint.x + A.height + B.height; i++) {
                for (let j = startPoint.y; j < startPoint.y + A.width; j++) {
@@ -189,7 +174,8 @@ class Game extends PureComponent {
 
      // this.setState({corners: this.getCornersView(cornerRegions) || []});
 
-      const solver = new Solver(this.props.initial_x, this.props.initial_y, 0, 0, 2, 5);
+      const solver = new Solver(this.state.size_map.initial_x, this.state.size_map.initial_y, 0, 0,
+         this.state.finish, this.state.size_map, this.state.walls, 2, 5);
       let solution = solver.graphState();
 
       /*
@@ -268,6 +254,10 @@ class Game extends PureComponent {
    }
 
    updatePos = (x, y) => {
+      let flag = false;
+      if (x === this.state.x && y === this.state.y) {
+         return {};
+      }
       this.setState(s => {
          if (!this.isValidNextPos(x, y)) return {};
          return {
@@ -278,6 +268,14 @@ class Game extends PureComponent {
             delta_y: y - s.y
          };
       });
+      const s = this.state;
+
+      const isWin = s.y > s.finish[0].y + 1 && y <= s.finish[0].y + 1;
+      if (isWin && !flag) {
+         alert('You win!');
+         flag = true;
+         this.reloadGame();
+      }
    };
 
    solutionChange = event => {
@@ -300,13 +298,11 @@ class Game extends PureComponent {
 
    reloadGame = event => {
       this.setState({
-         x: this.props.initial_x,
-         y: this.props.initial_y,
+         x: this.state.size_map.initial_x,
+         y: this.state.size_map.initial_y,
          delta_x: 0,
          delta_y: 0,
-         trace: [[this.props.initial_x, this.props.initial_y]],
-         walls: walls,
-         finish: finish
+         trace: [[this.state.size_map.initial_x, this.state.size_map.initial_y]]
       });
    }
 
@@ -320,7 +316,22 @@ class Game extends PureComponent {
    };
 
    changeTrack = event => {
-      alert('Will be soon');
+      const id = maps.length - 1 >= this.state.id_trace + 1 ? this.state.id_trace + 1 : 0;
+      this.setState({
+         size_map: maps[id].size_map,
+         id_trace: id,
+         W: maps[id].W,
+         x: maps[id].size_map.initial_x,
+         y: maps[id].size_map.initial_y,
+         delta_x: 0,
+         delta_y: 0,
+         corners: [],
+         currentSolution: [],
+         currentSolutionIndex: 0,
+         trace: [[maps[id].size_map.initial_x, maps[id].size_map.initial_y]],
+         walls: maps[id].walls,
+         finish: maps[id].finish
+      });
    }
 
    goBack = event => {
@@ -344,7 +355,6 @@ class Game extends PureComponent {
    };
 
    render() {
-      const { size_x, size_y } = this.props;
       return (
          <div className="Game">
             <h1>RaceTrack</h1>
@@ -356,15 +366,15 @@ class Game extends PureComponent {
             <button className="reloadBtn" onClick={this.optimalSolutionView}>View optimal solution</button>
             <svg
                className="Game"
-               viewBox={`-2 -2 ${size_x + 4} ${size_y + 4}`}
+               viewBox={`-2 -2 ${this.state.size_map.size_x + 4} ${this.state.size_map.size_y + 4}`}
                onClick={this.handleClick}
                ref={ref => {
                   this.svg = ref;
                }}>
-               <Grid size_x={size_x} size_y={size_y} />
-               <Walls walls={walls} />
+               <Grid size_x={this.state.size_map.size_x} size_y={this.state.size_map.size_y} />
+               <Walls walls={this.state.walls} />
                <Corner corners={this.state.corners} />
-               <Finish finish={finish} />
+               <Finish finish={this.state.finish} />
                <Trace trace={this.state.trace} />
                <CurrentPos {...this.state} />
                {!this.isFinish(this.state.x, this.state.y) ? <NextPos {...this.state} /> : null}
