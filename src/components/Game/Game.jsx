@@ -170,7 +170,7 @@ class Game extends PureComponent {
          ...rightTopRegion,
          ...leftBottomRegion,
          ...rightBottomRegion
-      ]
+      ];
 
      // this.setState({corners: this.getCornersView(cornerRegions) || []});
 
@@ -221,7 +221,8 @@ class Game extends PureComponent {
       if (solution.length) {
          this.setState({
             currentSolutionIndex: 0,
-            currentSolution: solution
+            currentSolution: solution,
+            trace: [[this.state.size_map.initial_x, this.state.size_map.initial_y]]
          });
 
          this.solutionView(solution[0]);
@@ -280,10 +281,11 @@ class Game extends PureComponent {
 
    solutionChange = event => {
       this.reloadGame();
-      this.solutionView(this.state.currentSolution[this.state.currentSolutionIndex + 1]);
+      const id = this.state.currentSolution.length - 1 >= this.state.currentSolutionIndex + 1 ? this.state.currentSolutionIndex + 1 : 0;
+      this.solutionView(this.state.currentSolution[id]);
 
       this.setState(s => {
-         return { currentSolutionIndex: s.currentSolutionIndex + 1 }
+         return { currentSolutionIndex: id }
       });
    }
 

@@ -131,7 +131,7 @@ export class Solver {
          end = new Date().getTime();
          let currentState: PointState = this.queue.shift() as PointState;
          if (end - start > 17000) {
-            alert(`Time: ${end - start}`);
+            //alert(`Time: ${end - start}`);
             this.stateGraph = graph;
             return graph;
          }
