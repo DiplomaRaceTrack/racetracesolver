@@ -20,7 +20,7 @@ class Game extends PureComponent {
       this.state = {
          x: maps[0].size_map.initial_x,
          y: maps[0].size_map.initial_y,
-         W: maps[0].W,
+         W: maps[0].size_map.W,
          delta_x: 0,
          delta_y: 0,
          trace: [[maps[0].size_map.initial_x, maps[0].size_map.initial_y]],
@@ -67,7 +67,7 @@ class Game extends PureComponent {
       if (isWall || isFinish || isExternal) {
          return false;
       }
-      return true; // TODO; check walls
+      return true;
    }
 
    getRectanglesSize() {
@@ -112,7 +112,7 @@ class Game extends PureComponent {
             }
             break;
          case 'rb':
-            startPoint = {x: 0, y: this.state.size_y - this.state.W};
+            startPoint = {x: 0, y: this.state.size_map.size_y - this.state.W};
             // левый нижний
             for (let i = startPoint.x; i < startPoint.x + A.height + B.height; i++) {
                for (let j = startPoint.y; j < startPoint.y + A.width; j++) {
@@ -154,7 +154,7 @@ class Game extends PureComponent {
       }
    }
 
-   startSolve = event => {
+   viewCorners = () => {
       // Получение размеров прямоугольников
       const rects = this.getRectanglesSize();
       const rectA = rects.A;
@@ -172,51 +172,27 @@ class Game extends PureComponent {
          ...rightBottomRegion
       ];
 
-     // this.setState({corners: this.getCornersView(cornerRegions) || []});
+      this.setState({corners: this.getCornersView(cornerRegions) || []});
+      return cornerRegions;
+   }
 
+   getSolution = event => {
+      this.reloadGame();
+      const solver = new Solver(this.state.size_map.initial_x, this.state.size_map.initial_y, 0, 0,
+         this.state.finish, this.state.size_map, this.state.walls, 2, 5);
+      let solution = solver.A_star();
+      if (solution) {
+         this.solutionView(solution);
+      }
+   }
+
+   startSolve = event => {
+      if (this.state.size_map.W) {
+         this.viewCorners();
+      }
       const solver = new Solver(this.state.size_map.initial_x, this.state.size_map.initial_y, 0, 0,
          this.state.finish, this.state.size_map, this.state.walls, 2, 5);
       let solution = solver.graphState();
-
-      /*
-      let minLeftSol = solution;
-      let minRightSol = null;
-      let min3 = null;
-      let min4 = null;
-      outer: while (!min4) {
-         for (let i = 0; i < leftTopRegion.length; i++) {
-            const res1 = new Solver(2, 15, 0, 0, leftTopRegion[i].x, leftTopRegion[i].y).bfs();
-            if (res1) {
-               minLeftSol = res1;
-               for (let j = 0; j < rightTopRegion.length; j++) {
-                  const res2 = new Solver(res1.x, res1.y, res1.delta_x, res1.delta_y, rightTopRegion[j].x, rightTopRegion[j].y).bfs();
-                  if (res2) {
-                     minRightSol = res2;
-                     for (let k = 0; k < rightBottomRegion.length; k++) {
-                        const res3 = new Solver(res2.x, res2.y, res2.delta_x, res2.delta_y, rightBottomRegion[k].x, rightBottomRegion[k].y).bfs();
-                        if (res3) {
-                           min3 = res3;
-                           for (let m = 0; m < leftBottomRegion.length; m++) {
-                              const res4 = new Solver(res3.x, res3.y, res3.delta_x, res3.delta_y,
-                                 leftBottomRegion[m].x, leftBottomRegion[m].y).bfs();
-                              if (res4) {
-                                 min4 = res4;
-                                 break outer;
-                              }
-                           }
-                        }
-                     }
-                  }
-               }
-            }
-         }
-         break outer;
-      }
-
-      this.solutionView(minLeftSol);
-      this.solutionView(minRightSol);
-      this.solutionView(min3);
-      this.solutionView(min4);*/
 
       if (solution.length) {
          this.setState({
@@ -233,6 +209,7 @@ class Game extends PureComponent {
       if (!solution.length) {
          return null;
       }
+
       let min = solution[0];
       for (let i = 0; i < solution.length; i++) {
          if (solution[i].deep < min.deep) {
@@ -275,7 +252,6 @@ class Game extends PureComponent {
       if (isWin && !flag) {
          alert('You win!');
          flag = true;
-         this.reloadGame();
       }
    };
 
@@ -304,7 +280,8 @@ class Game extends PureComponent {
          y: this.state.size_map.initial_y,
          delta_x: 0,
          delta_y: 0,
-         trace: [[this.state.size_map.initial_x, this.state.size_map.initial_y]]
+         trace: [[this.state.size_map.initial_x, this.state.size_map.initial_y]],
+         corners: []
       });
    }
 
@@ -360,19 +337,24 @@ class Game extends PureComponent {
       return (
          <div className="Game">
             <h1>RaceTrack</h1>
-            <button onClick={this.goBack}>Undo</button>
-            <button className="reloadBtn" onClick={this.reloadGame}>New game</button>
-            <button className="reloadBtn" onClick={this.changeTrack}>Change track</button>
-            <button className="reloadBtn" onClick={this.startSolve}>Get solution</button>
-            <button className="reloadBtn" onClick={this.solutionChange}>Next solution</button>
-            <button className="reloadBtn" onClick={this.optimalSolutionView}>View optimal solution</button>
+            <div>
+               <button onClick={this.goBack}>Undo</button>
+               <button className="reloadBtn" onClick={this.reloadGame}>New game</button>
+               <button className="reloadBtn" onClick={this.changeTrack}>Change track</button>
+            </div>
+            <div>
+               <button className="reloadBtn" onClick={this.startSolve}>Get with solution (graph state)</button>
+               <button className="reloadBtn" onClick={this.solutionChange}>Next solution (graph state)</button>
+               <button className="reloadBtn" onClick={this.optimalSolutionView}>View optimal solution (graph state)</button>
+            </div>
+            <div>
+               <button className="reloadBtn" onClick={this.getSolution}>Get optimal solution A*</button>
+            </div>
             <svg
                className="Game"
                viewBox={`-2 -2 ${this.state.size_map.size_x + 4} ${this.state.size_map.size_y + 4}`}
                onClick={this.handleClick}
-               ref={ref => {
-                  this.svg = ref;
-               }}>
+               ref={ref => { this.svg = ref; }}>
                <Grid size_x={this.state.size_map.size_x} size_y={this.state.size_map.size_y} />
                <Walls walls={this.state.walls} />
                <Corner corners={this.state.corners} />

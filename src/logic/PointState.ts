@@ -6,14 +6,19 @@ export class PointState{
    private _parent: PointState|null = null;
    private _deep: number = 0;
    private _visited: boolean = false;
+   private _h?: any = -1;
+   private _g?: any = -1;
    private readonly _state: Array<Array<string|number>> = [];
 
-   constructor(x: number, y: number, delta_x: number, delta_y: number, visited?: boolean) {
+   constructor(x: number, y: number, delta_x?: number, delta_y?: number, visited?: boolean) {
       this._x = x;
       this._y = y;
-      this._delta_x = delta_x;
-      this._delta_y = delta_y;
-      //this._visited = visited;
+      if (delta_x) {
+         this._delta_x = delta_x;
+      }
+      if (delta_y) {
+         this._delta_y = delta_y;
+      }
    }
 
    get x(): number {
@@ -22,6 +27,22 @@ export class PointState{
 
    set x(value: number) {
       this._x = value;
+   }
+
+   get h(): number {
+      return this._h;
+   }
+
+   set h(value: number) {
+      this._h = value;
+   }
+
+   get g(): number {
+      return this._g;
+   }
+
+   set g(value: number) {
+      this._g = value;
    }
 
    get y(): number {

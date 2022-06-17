@@ -13,6 +13,15 @@ export const walls = [
    [
       {
          type: "rect",
+         x: 4,
+         y: 4,
+         height: 3,
+         width: 6
+      }
+   ],
+   [
+      {
+         type: "rect",
          x: 3,
          y: 3,
          height: 3,
@@ -81,8 +90,6 @@ export const walls = [
          height: 1,
          width: 1
       },
-
-      //15 13
       {
          type: "rect",
          x: 14,
@@ -94,16 +101,9 @@ export const walls = [
    [
       {
          type: "rect",
-         x: 0,
-         y: 0,
-         height: 2,
-         width: 1
-      },
-      {
-         type: "rect",
          x: 3,
-         y: 2,
-         height: 3,
+         y: 3,
+         height: 2,
          width: 3
       },
       {
@@ -111,7 +111,21 @@ export const walls = [
          x: 5,
          y: 4,
          height: 2,
-         width: 3
+         width: 2
+      },
+      {
+         type: "rect",
+         x: 0,
+         y: 0,
+         height: 2,
+         width: 1
+      },
+      {
+         type: "rect",
+         x: 9,
+         y: 7,
+         height: 1,
+         width: 1
       },
       {
          type: "rect",
@@ -119,18 +133,105 @@ export const walls = [
          y: 0,
          height: 2,
          width: 2
+      }
+   ],
+   [
+      {
+         type: "rect",
+         x: 3,
+         y: 4,
+         height: 3,
+         width: 3
       },
       {
          type: "rect",
-         x: 0,
-         y: 7,
-         height: 1,
-         width: 2
+         x: 5,
+         y: 4,
+         height: 4,
+         width: 3
+      },
+      {
+         type: "rect",
+         x: 6,
+         y: 6,
+         height: 5,
+         width: 6
+      },
+      {
+         type: "rect",
+         x: 10,
+         y: 8,
+         height: 4,
+         width: 3
       }
    ],
+   [
+      {
+         type: "rect",
+         x: 4,
+         y: 4,
+         height: 2,
+         width: 2
+      },
+         {
+            type: "rect",
+            x: 3,
+            y: 4,
+            height: 2,
+            width: 2
+         },
+         {
+            type: "rect",
+            x: 5,
+            y: 6,
+            height: 1,
+            width: 4
+         },
+         {
+            type: "rect",
+            x: 8,
+            y: 7,
+            height: 5,
+            width: 2
+         },
+         {
+            type: "rect",
+            x: 5,
+            y: 12,
+            height: 2,
+            width: 4
+         }
+      ]
 ];
 
 export const finish = [
+   [
+      {
+         type: "rect",
+         x: 0,
+         y: 4,
+         height: 1,
+         width: 3
+      }
+   ],
+   [
+      {
+         type: "rect",
+         x: 0,
+         y: 4,
+         height: 1,
+         width: 4
+      }
+   ],
+   [
+      {
+         type: "rect",
+         x: 0,
+         y: 4,
+         height: 1,
+         width: 3
+      }
+   ],
    [
       {
          type: "rect",
@@ -169,18 +270,35 @@ export const size_map = [
       W: 3
    },
    {
+      size_x: 14,
+      size_y: 11,
+      initial_x: 1,
+      initial_y: 4,
+      W: 4
+   },
+   {
       size_x: 15,
       size_y: 13,
       initial_x: 1,
-      initial_y: 4,
-      W: 3
+      initial_y: 4
    },
    {
       size_x: 10,
       size_y: 8,
       initial_x: 2,
-      initial_y: 4,
-      W: 3
+      initial_y: 4
+   },
+   {
+      size_x: 19,
+      size_y: 17,
+      initial_x: 2,
+      initial_y: 4
+   },
+   {
+      size_x: 13,
+      size_y: 18,
+      initial_x: 2,
+      initial_y: 4
    }
 ];
 
@@ -199,5 +317,20 @@ export const maps = [
       walls: walls[2],
       finish: finish[2],
       size_map: size_map[2]
+   },
+   {
+      walls: walls[3],
+      finish: finish[3],
+      size_map: size_map[3]
+   },
+   {
+      walls: walls[4],
+      finish: finish[4],
+      size_map: size_map[4]
+   },
+   {
+      walls: walls[5],
+      finish: finish[5],
+      size_map: size_map[5]
    }
 ];

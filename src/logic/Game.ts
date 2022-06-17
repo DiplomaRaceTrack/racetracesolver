@@ -75,17 +75,17 @@ export class Solver {
       const isWall = this.intersectWall(nexNode.x, nexNode.y) || this.intersectWall(currentNode.x, currentNode.y);
       const isExternal = nexNode.x <= 0 || nexNode.y <= 0
          || nexNode.x >= this.size_map.size_x || nexNode.y >= this.size_map.size_y;
+      const isUnderFinish = isFinish && (nexNode.y <= this.finish[0].y + 1 || currentNode.y <= this.finish[0].y + 1);
       if (nexNode.x === currentNode.x && nexNode.y === currentNode.y) return false;
       if (nexNode.x > currentNode.x + currentNode.delta_x + 1 || nexNode.x < currentNode.x + currentNode.delta_x - 1) return false;
       if (nexNode.y > currentNode.y + currentNode.delta_y + 1 || nexNode.y < currentNode.y + currentNode.delta_y - 1) return false;
 
-      return !(isWall || isFinish || isExternal);
+      return !(isWall || isFinish || isExternal || isUnderFinish);
    }
 
    public solveDFS(): void {
       this.visited = [];
       let result = this.dfs(this.start_node);
-      console.log(result);
    }
 
    private dfs(node: PointState): any {
@@ -116,6 +116,77 @@ export class Solver {
       return null;
    }
 
+   public A_star(): any {
+      const start_node = this.start_node;
+      const goal_node = this.goal_node;
+      this.queue = [];
+      this.visited = [];
+
+      start_node.g = 0;
+      start_node.h = this._getH(start_node);
+
+      this.queue.push(start_node);
+      while(this.queue.length) {
+         let lowInd = 0;
+         for(let i = 0; i < this.queue.length; i++) {
+            if(this.queue[i].g < this.queue[lowInd].g) { lowInd = i; }
+         }
+         let currentNode = this.queue[lowInd];
+
+         if (this.isEndGame(currentNode, goal_node)
+            || this.isEndGame(currentNode, new PointState(1, goal_node.y, 0, 0))) {
+            return currentNode;
+         }
+
+         this.queue.splice(lowInd, 1);
+         this.visited.push(currentNode);
+
+         const neighbours: PointState[] = this.getNeighbours(currentNode);
+         for (let i = 0; i < neighbours.length; i++) {
+            const neighbour = neighbours[i];
+            const isValid = this.isValidMove(currentNode, neighbour);
+            if (this.isVisited(neighbour) || !isValid) {
+               continue;
+            }
+            neighbour.h = this._getH(neighbour);
+            neighbour.parent = currentNode;
+            let sameInClose = this.visited.find((item: PointState) => {
+               if (this.isEqualNode(item, neighbour)) {
+                  return item;
+               }
+            });
+
+            let sameInOpen = this.queue.find((item: PointState) => {
+               if (this.isEqualNode(item, neighbour)) {
+                  return item;
+               }
+            });
+
+            if (this.isEndGame(neighbour, goal_node)
+               || this.isEndGame(neighbour, new PointState(1, goal_node.y, 0, 0))) {
+               neighbour.parent = currentNode;
+               return neighbour;
+            }
+
+            let distance = currentNode.g + 1;
+            if (sameInOpen && distance > sameInOpen.g) {
+               continue;
+            }
+            if (!(sameInClose && distance > sameInClose.g)) {
+               neighbour.g = distance;
+               neighbour.parent = currentNode;
+               this.queue.push(neighbour);
+            }
+         }
+      }
+
+      return null;
+   }
+
+   private _getH(s: PointState): any {
+      return Math.abs(s.x - this.goal_node.x) + Math.abs(s.y - this.goal_node.y);
+   }
+
    public graphState(): any {
       this.queue = [];
       const start_node = this.start_node;
@@ -130,15 +201,12 @@ export class Solver {
       while (this.queue.length !== 0) {
          end = new Date().getTime();
          let currentState: PointState = this.queue.shift() as PointState;
-         if (end - start > 17000) {
-            //alert(`Time: ${end - start}`);
+         if (end - start > 10000) {
             this.stateGraph = graph;
             return graph;
          }
          if (this.isEndGame(currentState, goal_node)
             || this.isEndGame(currentState, new PointState(1, goal_node.y, 0, 0))) {
-            console.log("You win!");
-            console.log(currentState);
             graph.push(currentState);
          }
 
@@ -188,7 +256,6 @@ export class Solver {
          if (this.isEndGame(currentState, goal_node)
             || this.isEndGame(currentState, new PointState(1, goal_node.y, 0, 0))) {
             console.log("You win!");
-            console.log(currentState);
             return currentState;
          }
 
