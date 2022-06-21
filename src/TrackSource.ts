@@ -201,7 +201,16 @@ export const walls = [
             height: 2,
             width: 4
          }
-      ]
+      ],
+   [
+      {
+         type: "rect",
+         x: 3,
+         y: 2,
+         height: 2,
+         width: 10
+      }
+   ],
 ];
 
 export const finish = [
@@ -258,6 +267,15 @@ export const finish = [
          height: 1,
          width: 3
       }
+   ],
+   [
+      {
+         type: "rect",
+         x: 0,
+         y: 2,
+         height: 1,
+         width: 3
+      }
    ]
 ];
 
@@ -299,6 +317,12 @@ export const size_map = [
       size_y: 18,
       initial_x: 2,
       initial_y: 4
+   },
+   {
+      size_x: 16,
+      size_y: 6,
+      initial_x: 2,
+      initial_y: 2
    }
 ];
 
@@ -332,5 +356,10 @@ export const maps = [
       walls: walls[5],
       finish: finish[5],
       size_map: size_map[5]
+   },
+   {
+      walls: walls[6],
+      finish: finish[6],
+      size_map: size_map[6]
    }
 ];

@@ -54,27 +54,37 @@ class Game extends PureComponent {
       return flag;
    }
 
+   isFinishPoint(x, y) {
+      let flag = false;
+      const widthFinish = this.state.finish[0].width;
+      for(let i = 0; i < widthFinish; i++) {
+         if (x === this.state.finish[0].x + i && y === this.state.finish[0].y + 1) {
+            flag = true;
+         }
+      }
+   }
+
    isValidNextPos(x, y) {
       const s = this.state;
       const isFinish = s.finish.some(finishPoint => intersect(finishPoint, [[s.x, s.y], [x, y]]));
       const isWall = this.intersectWall(x, y);
       const isExternal = x <= 0 || y <= 0 || x >= this.state.size_map.size_x || y >= this.state.size_map.size_y;
-
+      const isUnderFinish = this.isFinishPoint(x, y) && (y <= this.finish[0].y + 1);
       const isWin = s.y > s.finish[0].y + 1 && y <= s.finish[0].y + 1;
       if (x === s.x && y === s.y) return false;
       if (x > s.x + s.delta_x + 1 || x < s.x + s.delta_x - 1) return false;
       if (y > s.y + s.delta_y + 1 || y < s.y + s.delta_y - 1) return false;
-      if (isWall || isFinish || isExternal) {
+      if (isWall || isFinish || isExternal || isUnderFinish) {
          return false;
       }
       return true;
    }
 
    getRectanglesSize() {
-      const rect1A = Math.floor(Math.sqrt(2 * this.state.W));
-      const rect1B = Math.floor(Math.sqrt(2 * this.state.W)) + 1;
-      const rect2A = Math.floor(Math.sqrt(2 * this.state.W));
-      const rect2B = this.state.W;
+      const rect1A = Math.floor(Math.sqrt(2 * this.state.size_map.W));
+      const rect1B = Math.floor(Math.sqrt(2 * this.state.size_map.W)) + 1;
+      const rect2A = Math.floor(Math.sqrt(2 * this.state.size_map.W));
+      const rect2B = this.state.size_map.W;
       return {A: {width: rect1A, height: rect1B},
          B: {width: rect2A, height: rect2B}};
    }
@@ -85,7 +95,7 @@ class Game extends PureComponent {
       let startPoint = {x: 0, y: 0};
       switch (direction) {
          case 'lb':
-            startPoint = {x: 0 + this.state.W, y: 0};
+            startPoint = {x: 0 + this.state.size_map.W, y: 0};
             // левый верхний прямоугольник
             for (let i = startPoint.x - A.width; i < startPoint.x; i++) {
                for (let j = startPoint.y; j < startPoint.y + A.height + B.height; j++) {
@@ -94,7 +104,7 @@ class Game extends PureComponent {
             }
             break;
          case 'rt':
-            startPoint = {x: this.state.size_map.size_x - this.state.W, y: this.state.size_map.size_y - 1};
+            startPoint = {x: this.state.size_map.size_x - this.state.size_map.W, y: this.state.size_map.size_y - 1};
             // правый нижний прямоуольник
             for (let i = startPoint.x; i < startPoint.x + A.width; i++) {
                for (let j = startPoint.y; j > startPoint.y - A.height - B.height; j--) {
@@ -103,7 +113,7 @@ class Game extends PureComponent {
             }
             break;
          case 'll':
-            startPoint = {x: this.state.size_map.size_x - 1, y: this.state.W - 1};
+            startPoint = {x: this.state.size_map.size_x - 1, y: this.state.size_map.W - 1};
             // правый верхний
             for (let i = startPoint.x; i > startPoint.x - A.height - B.height; i--) {
                for (let j = startPoint.y; j > startPoint.y - A.width; j--) {
@@ -112,7 +122,7 @@ class Game extends PureComponent {
             }
             break;
          case 'rb':
-            startPoint = {x: 0, y: this.state.size_map.size_y - this.state.W};
+            startPoint = {x: 0, y: this.state.size_map.size_y - this.state.size_map.W};
             // левый нижний
             for (let i = startPoint.x; i < startPoint.x + A.height + B.height; i++) {
                for (let j = startPoint.y; j < startPoint.y + A.width; j++) {
@@ -179,7 +189,7 @@ class Game extends PureComponent {
    getSolution = event => {
       this.reloadGame();
       const solver = new Solver(this.state.size_map.initial_x, this.state.size_map.initial_y, 0, 0,
-         this.state.finish, this.state.size_map, this.state.walls, 2, 5);
+         this.state.finish, this.state.size_map, this.state.walls, 2, this.state.finish[0].y + 1);
       let solution = solver.A_star();
       if (solution) {
          this.solutionView(solution);
@@ -191,7 +201,7 @@ class Game extends PureComponent {
          this.viewCorners();
       }
       const solver = new Solver(this.state.size_map.initial_x, this.state.size_map.initial_y, 0, 0,
-         this.state.finish, this.state.size_map, this.state.walls, 2, 5);
+         this.state.finish, this.state.size_map, this.state.walls, 2, this.state.finish[0].y + 1);
       let solution = solver.graphState();
 
       if (solution.length) {

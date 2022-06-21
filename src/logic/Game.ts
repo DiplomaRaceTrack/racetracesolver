@@ -23,7 +23,7 @@ export class Solver {
    protected size_map: any;
    protected walls: any[];
 
-   protected queue: Array<PointState> = [];
+   protected queue: any = [];
    protected visited: any = [];
 
    protected stateGraph: Array<PointState> = [];
@@ -56,13 +56,47 @@ export class Solver {
       return firstNode.x === secondNode.x && firstNode.y === secondNode.y;
    }
 
-   intersectWall(x: number, y: number) {
+   private isEqualGraphPoint(firstNode: PointState, secondNode: PointState): boolean {
+      return firstNode.x === secondNode.x && firstNode.y === secondNode.y &&
+         firstNode.delta_x === secondNode.delta_x && firstNode.delta_y === secondNode.delta_y;
+   }
+
+   private arrayHasPoint(array: any, node: PointState): boolean {
+      return array.find((item: PointState) => this.isEqualGraphPoint(item, node));
+   }
+
+   // returns true if the line from (a,b)->(c,d) intersects with (p,q)->(r,s)
+   private intersectsWall(a: number, b: number, c: number, d: number, p: number, q: number, r: number, s: number) {
+      let det, gamma, lambda;
+      det = (c - a) * (s - q) - (r - p) * (d - b);
+      if (det === 0) {
+         return false;
+      } else {
+         lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+         gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+         return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+      }
+   };
+
+   intersectWall(x: number, y: number, nextX: number, nextY: number) {
       let flag = false;
       this.walls.forEach((wall: any) => {
          if (x >= wall.x && x <= wall.x + wall.width && y >= wall.y && y <= wall.y + wall.height) {
             flag = true;
          }
       });
+      if (!flag) {
+         this.walls.forEach((wall: any) => {
+            const intersect1 = this.intersectsWall(x, y, nextX, nextY, wall.x, wall.y, wall.x, wall.y + wall.height);
+            const intersect2 = this.intersectsWall(x, y, nextX, nextY, wall.x, wall.y, wall.x + wall.width, wall.y);
+            const intersect3 = this.intersectsWall(x, y, nextX, nextY, wall.x + wall.width, wall.y,
+               wall.x + wall.width, wall.y + wall.height);
+            const intersect4 = this.intersectsWall(x, y, nextX, nextY, wall.x, wall.y + wall.height, wall.x + wall.width, wall.y + wall.height);
+            if (intersect1 || intersect2 || intersect3 || intersect4) {
+               flag = true;
+            }
+         });
+      }
       return flag;
    }
 
@@ -70,12 +104,23 @@ export class Solver {
       return this.visited.find((item: PointState) => this.isEqualNode(item, node));
    }
 
+   private isFinishPoint(x: number, y: number): boolean {
+      let flag = false;
+      const widthFinish = this.finish[0].width;
+      for(let i = 0; i < widthFinish; i++) {
+         if (x === this.finish[0].x + i && y === this.finish[0].y + 1) {
+            flag = true;
+         }
+      }
+      return flag;
+   }
+
    private isValidMove(currentNode: PointState, nexNode: PointState): boolean {
       const isFinish = this.finish.some(finishPoint => intersect(finishPoint, [[currentNode.x, currentNode.y], [nexNode.x, nexNode.y]]));
-      const isWall = this.intersectWall(nexNode.x, nexNode.y) || this.intersectWall(currentNode.x, currentNode.y);
+      const isWall = this.intersectWall(currentNode.x, currentNode.y, nexNode.x, nexNode.y);
       const isExternal = nexNode.x <= 0 || nexNode.y <= 0
          || nexNode.x >= this.size_map.size_x || nexNode.y >= this.size_map.size_y;
-      const isUnderFinish = isFinish && (nexNode.y <= this.finish[0].y + 1 || currentNode.y <= this.finish[0].y + 1);
+      const isUnderFinish = this.isFinishPoint(nexNode.x, nexNode.y) && (currentNode.y <= this.finish[0].y + 1);
       if (nexNode.x === currentNode.x && nexNode.y === currentNode.y) return false;
       if (nexNode.x > currentNode.x + currentNode.delta_x + 1 || nexNode.x < currentNode.x + currentNode.delta_x - 1) return false;
       if (nexNode.y > currentNode.y + currentNode.delta_y + 1 || nexNode.y < currentNode.y + currentNode.delta_y - 1) return false;
@@ -121,7 +166,8 @@ export class Solver {
       const goal_node = this.goal_node;
       this.queue = [];
       this.visited = [];
-
+      const start = new Date().getTime();
+      let end = new Date().getTime();
       start_node.g = 0;
       start_node.h = this._getH(start_node);
 
@@ -132,9 +178,10 @@ export class Solver {
             if(this.queue[i].g < this.queue[lowInd].g) { lowInd = i; }
          }
          let currentNode = this.queue[lowInd];
-
+         end = new Date().getTime();
          if (this.isEndGame(currentNode, goal_node)
             || this.isEndGame(currentNode, new PointState(1, goal_node.y, 0, 0))) {
+            alert(`Time: ${end - start}`);
             return currentNode;
          }
 
@@ -165,6 +212,7 @@ export class Solver {
             if (this.isEndGame(neighbour, goal_node)
                || this.isEndGame(neighbour, new PointState(1, goal_node.y, 0, 0))) {
                neighbour.parent = currentNode;
+               alert(`Time: ${end - start}`);
                return neighbour;
             }
 
@@ -187,8 +235,11 @@ export class Solver {
       return Math.abs(s.x - this.goal_node.x) + Math.abs(s.y - this.goal_node.y);
    }
 
+
+
    public graphState(): any {
       this.queue = [];
+      this.visited = [];
       const start_node = this.start_node;
       const goal_node = this.goal_node;
 
@@ -201,7 +252,9 @@ export class Solver {
       while (this.queue.length !== 0) {
          end = new Date().getTime();
          let currentState: PointState = this.queue.shift() as PointState;
-         if (end - start > 10000) {
+         this.visited.push(currentState);
+         if (end - start > 150000) {
+            alert(`Time: ${end - start}`);
             this.stateGraph = graph;
             return graph;
          }
@@ -212,13 +265,16 @@ export class Solver {
 
          const neighbours: PointState[] = this.getNeighbours(currentState);
          for (let i = 0; i < neighbours.length; i++) {
-            if (this.isValidMove(currentState, neighbours[i])) {
+            const isUnderFinish = this.isEndGame(neighbours[i], goal_node)
+               && (currentState.y <= this.finish[0].y + 1);
+            if (this.isValidMove(currentState, neighbours[i]) && !this.arrayHasPoint(this.queue, neighbours[i]) &&
+            !this.arrayHasPoint(this.visited, neighbours[i]) && !isUnderFinish) {
                neighbours[i].parent = currentState;
                this.queue.push(neighbours[i]);
             }
          }
       }
-
+      alert(`Time: ${end - start}`);
       return graph;
    }
 
