@@ -181,7 +181,7 @@ export class Solver {
          end = new Date().getTime();
          if (this.isEndGame(currentNode, goal_node)
             || this.isEndGame(currentNode, new PointState(1, goal_node.y, 0, 0))) {
-            alert(`Time: ${end - start}`);
+          //  alert(`Time: ${end - start}`);
             return currentNode;
          }
 
@@ -212,7 +212,7 @@ export class Solver {
             if (this.isEndGame(neighbour, goal_node)
                || this.isEndGame(neighbour, new PointState(1, goal_node.y, 0, 0))) {
                neighbour.parent = currentNode;
-               alert(`Time: ${end - start}`);
+               //alert(`Time: ${end - start}`);
                return neighbour;
             }
 
@@ -253,11 +253,11 @@ export class Solver {
          end = new Date().getTime();
          let currentState: PointState = this.queue.shift() as PointState;
          this.visited.push(currentState);
-         if (end - start > 150000) {
+         /*if (end - start > 150000) {
             alert(`Time: ${end - start}`);
             this.stateGraph = graph;
             return graph;
-         }
+         }*/
          if (this.isEndGame(currentState, goal_node)
             || this.isEndGame(currentState, new PointState(1, goal_node.y, 0, 0))) {
             graph.push(currentState);
@@ -274,7 +274,7 @@ export class Solver {
             }
          }
       }
-      alert(`Time: ${end - start}`);
+      //alert(`Time: ${end - start}`);
       return graph;
    }
 
