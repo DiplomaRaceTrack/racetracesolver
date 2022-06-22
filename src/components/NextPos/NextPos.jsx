@@ -34,6 +34,11 @@ class NextPos extends PureComponent {
             flag = true;
          }
       });
+      this.props.walls.forEach((wall) => {
+         if (nextX >= wall.x && nextX <= wall.x + wall.width && nextY >= wall.y && nextY <= wall.y + wall.height) {
+            flag = true;
+         }
+      });
       if (!flag) {
          this.props.walls.forEach((wall) => {
             const intersect1 = this.intersectsWall(x, y, nextX, nextY, wall.x, wall.y, wall.x, wall.y + wall.height);

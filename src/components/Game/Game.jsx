@@ -64,6 +64,11 @@ class Game extends PureComponent {
             flag = true;
          }
       });
+      this.state.walls.forEach((wall) => {
+         if (nextX >= wall.x && nextX <= wall.x + wall.width && nextY >= wall.y && nextY <= wall.y + wall.height) {
+            flag = true;
+         }
+      });
       if (!flag) {
          this.state.walls.forEach((wall) => {
             const intersect1 = this.intersectsWall(x, y, nextX, nextY, wall.x, wall.y, wall.x, wall.y + wall.height);
@@ -310,6 +315,7 @@ class Game extends PureComponent {
             alert('You win!');
             this.reloadGame();
             flag = true;
+            return flag;
          }
       }
    };
@@ -352,11 +358,16 @@ class Game extends PureComponent {
 
       const x = Math.round(cursopt.x);
       const y = Math.round(cursopt.y)
-      this.updatePos(x, y);
+      const isWin = this.updatePos(x, y);
 
+      const prevNeighbours = this.getNeighbours({x: this.state.x, y: this.state.y, delta_x: this.state.delta_x, delta_y: this.state.delta_y});
       const neighbours = this.getNeighbours({x: x, y: y, delta_x: x - this.state.x, delta_y: y - this.state.y});
       let count = 0;
+      let flag = false;
       for(let i = 0; i < neighbours.length; i++) {
+         if (prevNeighbours && prevNeighbours[i] && x === prevNeighbours[i].x && y === prevNeighbours[i].y) {
+            flag = true;
+         }
          const isFinish = this.state.finish.some(finishPoint => intersect(finishPoint, [[x, y], [neighbours[i].x, neighbours[i].y]]));
          const isWall = this.intersectWall(x, y, neighbours[i].x, neighbours[i].y);
          const isExternal = neighbours[i].x <= 0 || neighbours[i].y <= 0 || neighbours[i].x >= this.state.size_map.size_x
@@ -366,7 +377,8 @@ class Game extends PureComponent {
             count++;
          }
       }
-      if (count === neighbours.length) {
+      if (count === neighbours.length && x <= this.state.size_map.size_x && y <= this.state.size_map.size_y
+            && x >= 0 && y >= 0 && flag && !isWin) {
          alert('You lose!');
       }
    };
