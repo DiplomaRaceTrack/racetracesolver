@@ -211,6 +211,80 @@ export const walls = [
          width: 10
       }
    ],
+   [
+      {
+         type: "rect",
+         x: 3,
+         y: 3,
+         height: 9,
+         width: 4
+      },
+      {
+         type: "rect",
+         x: 5,
+         y: 12,
+         height: 2,
+         width: 8
+      },
+      {
+         type: "rect",
+         x: 13,
+         y: 5,
+         height: 8,
+         width: 4
+      },
+      {
+         type: "rect",
+         x: 9,
+         y: 0,
+         height: 8,
+         width: 2
+      }
+   ],
+   [
+      {
+         type: "rect",
+         x: 3,
+         y: 3,
+         height: 5,
+         width: 13
+      },
+      {
+         type: "rect",
+         x: 3,
+         y: 8,
+         height: 4,
+         width: 4
+      },
+      {
+         type: "rect",
+         x: 10,
+         y: 10,
+         height: 2,
+         width: 9
+      },
+      {
+         type: "rect",
+         x: 6,
+         y: 12,
+         height: 3,
+         width: 2
+      },
+      {
+         type: "rect",
+         x: 8,
+         y: 14,
+         height: 1,
+         width: 8
+      },
+      {
+         type: "rect",
+         x: 0,
+         y: 15,
+         height: 3,
+         width: 3
+      }
+   ]
 ];
 
 export const finish = [
@@ -276,6 +350,24 @@ export const finish = [
          height: 1,
          width: 3
       }
+   ],
+   [
+      {
+         type: "rect",
+         x: 0,
+         y: 6,
+         height: 1,
+         width: 3
+      }
+   ],
+   [
+      {
+         type: "rect",
+         x: 0,
+         y: 6,
+         height: 1,
+         width: 3
+      }
    ]
 ];
 
@@ -323,6 +415,18 @@ export const size_map = [
       size_y: 6,
       initial_x: 2,
       initial_y: 2
+   },
+   {
+      size_x: 19,
+      size_y: 17,
+      initial_x: 2,
+      initial_y: 6
+   },
+   {
+      size_x: 19,
+      size_y: 17,
+      initial_x: 2,
+      initial_y: 6
    }
 ];
 
@@ -361,5 +465,15 @@ export const maps = [
       walls: walls[6],
       finish: finish[6],
       size_map: size_map[6]
+   },
+   {
+      walls: walls[7],
+      finish: finish[7],
+      size_map: size_map[7]
+   },
+   {
+      walls: walls[8],
+      finish: finish[8],
+      size_map: size_map[8]
    }
 ];
