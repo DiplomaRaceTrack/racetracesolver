@@ -299,9 +299,16 @@ class Game extends PureComponent {
       const s = this.state;
 
       if (this.isValidNextPos(x, y)) {
-         const isWin = s.y > s.finish[0].y + 1 && y <= s.finish[0].y + 1;
+         const widthFinish = this.state.finish[0].width;
+         let isWin = false;
+         for(let i = 0; i < widthFinish; i++) {
+            if (x === this.state.finish[0].x + i && y === this.state.finish[0].y + 1) {
+               isWin = true;
+            }
+         }
          if (isWin && !flag) {
             alert('You win!');
+            this.reloadGame();
             flag = true;
          }
       }
@@ -350,8 +357,12 @@ class Game extends PureComponent {
       const neighbours = this.getNeighbours({x: x, y: y, delta_x: x - this.state.x, delta_y: y - this.state.y});
       let count = 0;
       for(let i = 0; i < neighbours.length; i++) {
-         if (!this.isValidNextPos(neighbours[i].x, neighbours[i].y) || (
-            neighbours[i].x === x && neighbours[i].y === y)) {
+         const isFinish = this.state.finish.some(finishPoint => intersect(finishPoint, [[x, y], [neighbours[i].x, neighbours[i].y]]));
+         const isWall = this.intersectWall(x, y, neighbours[i].x, neighbours[i].y);
+         const isExternal = neighbours[i].x <= 0 || neighbours[i].y <= 0 || neighbours[i].x >= this.state.size_map.size_x
+            || neighbours[i].y >= this.state.size_map.size_y;
+         const isUnderFinish = this.isFinishPoint(neighbours[i].x, neighbours[i].y) && (neighbours[i].y <= this.finish[0].y + 1);
+         if (isWall || isFinish || isExternal || isUnderFinish || neighbours[i].x === x && neighbours[i].y === y) {
             count++;
          }
       }
