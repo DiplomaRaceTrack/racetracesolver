@@ -311,6 +311,13 @@ class Game extends PureComponent {
                isWin = true;
             }
          }
+         const intersect = this.intersectsWall(this.state.x, this.state.y, x, y,
+            0, this.state.finish[0].y + 1, widthFinish, this.state.finish[0].y + 1);
+
+         if (intersect) {
+            isWin = true;
+         }
+
          if (isWin && !flag) {
             alert('You win!');
             this.reloadGame();
