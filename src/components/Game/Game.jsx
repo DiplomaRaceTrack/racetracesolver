@@ -44,13 +44,38 @@ class Game extends PureComponent {
       return isFinish;
    }
 
-   intersectWall(x, y) {
+   // returns true if the line from (a,b)->(c,d) intersects with (p,q)->(r,s)
+   intersectsWall(a, b, c, d, p, q, r, s) {
+      let det, gamma, lambda;
+      det = (c - a) * (s - q) - (r - p) * (d - b);
+      if (det === 0) {
+         return false;
+      } else {
+         lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+         gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+         return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+      }
+   };
+
+   intersectWall(x, y, nextX, nextY) {
       let flag = false;
       this.state.walls.forEach((wall) => {
          if (x >= wall.x && x <= wall.x + wall.width && y >= wall.y && y <= wall.y + wall.height) {
             flag = true;
          }
       });
+      if (!flag) {
+         this.state.walls.forEach((wall) => {
+            const intersect1 = this.intersectsWall(x, y, nextX, nextY, wall.x, wall.y, wall.x, wall.y + wall.height);
+            const intersect2 = this.intersectsWall(x, y, nextX, nextY, wall.x, wall.y, wall.x + wall.width, wall.y);
+            const intersect3 = this.intersectsWall(x, y, nextX, nextY, wall.x + wall.width, wall.y,
+               wall.x + wall.width, wall.y + wall.height);
+            const intersect4 = this.intersectsWall(x, y, nextX, nextY, wall.x, wall.y + wall.height, wall.x + wall.width, wall.y + wall.height);
+            if (intersect1 || intersect2 || intersect3 || intersect4) {
+               flag = true;
+            }
+         });
+      }
       return flag;
    }
 
@@ -67,7 +92,7 @@ class Game extends PureComponent {
    isValidNextPos(x, y) {
       const s = this.state;
       const isFinish = s.finish.some(finishPoint => intersect(finishPoint, [[s.x, s.y], [x, y]]));
-      const isWall = this.intersectWall(x, y);
+      const isWall = this.intersectWall(s.x, s.y, x, y);
       const isExternal = x <= 0 || y <= 0 || x >= this.state.size_map.size_x || y >= this.state.size_map.size_y;
       const isUnderFinish = this.isFinishPoint(x, y) && (y <= this.finish[0].y + 1);
       const isWin = s.y > s.finish[0].y + 1 && y <= s.finish[0].y + 1;
@@ -258,10 +283,12 @@ class Game extends PureComponent {
       });
       const s = this.state;
 
-      const isWin = s.y > s.finish[0].y + 1 && y <= s.finish[0].y + 1;
-      if (isWin && !flag) {
-         alert('You win!');
-         flag = true;
+      if (this.isValidNextPos(x, y)) {
+         const isWin = s.y > s.finish[0].y + 1 && y <= s.finish[0].y + 1;
+         if (isWin && !flag) {
+            alert('You win!');
+            flag = true;
+         }
       }
    };
 

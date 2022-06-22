@@ -19,14 +19,24 @@
   stroke-width: 0.03;
 }
 
-.NextPos circle {
-  stroke: green;
-  stroke-width: 0.1;
-  fill: none;
+.NextPos circle.valid {
+    stroke: green;
+    stroke-width: 0.1;
+    fill: none;
 }
 
-.NextPos circle:hover {
+.NextPos circle.unvalid {
+    stroke: dimgrey;
+    stroke-width: 0.1;
+    fill: none;
+}
+
+.NextPos circle.valid:hover {
   fill: lightgreen;
+}
+
+.NextPos circle.unvalid:hover {
+    fill: gray;
 }
 
 .StopLine {
