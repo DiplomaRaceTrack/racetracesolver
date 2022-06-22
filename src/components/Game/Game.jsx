@@ -266,6 +266,21 @@ class Game extends PureComponent {
       })
    }
 
+   // получаем возможные позиции
+   getNeighbours(point) {
+      const neighbours = [];
+      neighbours.push({x: point.x + point.delta_x + 1, y: point.y + point.delta_y + 1});
+      neighbours.push({x: point.x + point.delta_x + 0, y: point.y + point.delta_y + 1});
+      neighbours.push({x: point.x + point.delta_x - 1, y: point.y + point.delta_y + 1});
+      neighbours.push({x: point.x + point.delta_x + 1, y: point.y + point.delta_y + 0});
+      neighbours.push({x: point.x + point.delta_x + 0, y: point.y + point.delta_y + 0});
+      neighbours.push({x: point.x + point.delta_x - 1, y: point.y + point.delta_y + 0});
+      neighbours.push({x: point.x + point.delta_x + 1, y: point.y + point.delta_y - 1});
+      neighbours.push({x: point.x + point.delta_x + 0, y: point.y + point.delta_y - 1});
+      neighbours.push({x: point.x + point.delta_x - 1, y: point.y + point.delta_y - 1});
+      return neighbours;
+   }
+
    updatePos = (x, y) => {
       let flag = false;
       if (x === this.state.x && y === this.state.y) {
@@ -328,7 +343,21 @@ class Game extends PureComponent {
       pt.y = event.clientY;
       const cursopt = pt.matrixTransform(this.svg.getScreenCTM().inverse());
 
-      this.updatePos(Math.round(cursopt.x), Math.round(cursopt.y));
+      const x = Math.round(cursopt.x);
+      const y = Math.round(cursopt.y)
+      this.updatePos(x, y);
+
+      const neighbours = this.getNeighbours({x: x, y: y, delta_x: x - this.state.x, delta_y: y - this.state.y});
+      let count = 0;
+      for(let i = 0; i < neighbours.length; i++) {
+         if (!this.isValidNextPos(neighbours[i].x, neighbours[i].y) || (
+            neighbours[i].x === x && neighbours[i].y === y)) {
+            count++;
+         }
+      }
+      if (count === neighbours.length) {
+         alert('You lose!');
+      }
    };
 
    changeTrack = event => {
