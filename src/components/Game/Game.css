@@ -1,3 +1,7 @@
+.Game {
+   max-height: 800px;
+}
+
 .Grid {
   stroke: blue;
   stroke-width: 0.02;
